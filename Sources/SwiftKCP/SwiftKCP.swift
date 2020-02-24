@@ -205,7 +205,7 @@ fileprivate func DefaultWritelog(logStr:String,kcp:inout IKCPCB,user:uint64) -> 
     print(logStr)
 }
 
-class IKCPCB {
+public class IKCPCB {
     var conv = uint32(0)
     var mtu = uint32(0)
     var mss = uint32(0)
