@@ -1105,7 +1105,8 @@ public class IKCPCB {
             return
         }
         
-        let log = String.localizedStringWithFormat(fmt, args)
+        let log = String.init(format: fmt, arguments: args)
+//        let log = String.localizedStringWithFormat(fmt, args)
         var weakSelf = self
         self.writelog?(log,&weakSelf,self.user)
     }
