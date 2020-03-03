@@ -62,8 +62,8 @@ fileprivate func _ibound_(lower:UInt32,middle:UInt32,upper:UInt32) -> UInt32 {
     return min(max(lower, middle), upper)
 }
 
-fileprivate func timeDiff(later:UInt32,earlier:UInt32) -> sint32 {
-    return sint32(later) - sint32(earlier)
+fileprivate func timeDiff(later:UInt32,earlier:UInt32) -> Int32 {
+    return Int32(later) - Int32(earlier)
 }
 
 fileprivate func KCPEncode8u(p:UnsafeMutablePointer<UInt8>,
@@ -101,19 +101,9 @@ fileprivate func KCPDecode16u(p:UnsafeMutablePointer<UInt8>,
     for i in 0..<size {
         buf[i] = (p+i).pointee
     }
-    let data = Data(bytes: buf)
-    switch CFByteOrderGetCurrent() {
-    case CFByteOrder(CFByteOrderLittleEndian.rawValue):
-        let value = UInt16(littleEndian: data.withUnsafeBytes { $0.pointee })
-        w.pointee = value
-        break
-    case CFByteOrder(CFByteOrderBigEndian.rawValue):
-        let value = UInt16(bigEndian: data.withUnsafeBytes { $0.pointee })
-        w.pointee = value
-        break
-    default:
-        break;
-    }
+    let data = Data(buf)
+    let value = data.withUnsafeBytes { $0.load(as: UInt16.self) }
+    w.pointee = value
     
     return UnsafePointer(p+size)
 }
@@ -143,19 +133,9 @@ fileprivate func KCPDecode32u(p:UnsafeMutablePointer<UInt8>,
     for i in 0..<size {
         buf[i] = (p+i).pointee
     }
-    let data = Data(bytes: buf)
-    switch CFByteOrderGetCurrent() {
-    case CFByteOrder(CFByteOrderLittleEndian.rawValue):
-        let value = UInt32(littleEndian: data.withUnsafeBytes { $0.pointee })
-        l.pointee = value
-        break
-    case CFByteOrder(CFByteOrderBigEndian.rawValue):
-        let value = UInt32(bigEndian: data.withUnsafeBytes { $0.pointee })
-        l.pointee = value
-        break
-    default:
-        break;
-    }
+    let data = Data(buf)
+    let value = data.withUnsafeBytes { $0.load(as: UInt32.self) }
+    l.pointee = value
     
     return UnsafePointer(p+size)
 }
@@ -193,7 +173,7 @@ struct IKCPSEG {
         ptr = KCPEncode32u(p: ptr, l: self.sn)
         ptr = KCPEncode32u(p: ptr, l: self.una)
         ptr = KCPEncode32u(p: ptr, l: UInt32(self.data.count))
-        return Data(bytes: buf)
+        return Data(buf)
     }
 }
 
@@ -315,7 +295,7 @@ public class IKCPCB {
         
         let indexSet = NSMutableIndexSet()
         for i in 0..<self.rcv_queue.count {
-            var seg = self.rcv_queue[Int(i)]
+            let seg = self.rcv_queue[Int(i)]
             
             var fragment = UInt32(0)
             for i in 0..<seg.data.count {
@@ -360,7 +340,7 @@ public class IKCPCB {
         for i in 0..<len {
             temp[i] = localBuffer[i]
         }
-        return Data(bytes: temp)
+        return Data(temp)
     }
     
     func peekSize() -> Int {
@@ -396,7 +376,7 @@ public class IKCPCB {
         }
         if 0 != self.stream {
             if !self.snd_queue.isEmpty {
-                var old = self.snd_queue.last!
+                let old = self.snd_queue.last!
                 if old.data.count < self.mss {
                     let capacity = self.mss - UInt32(old.data.count)
                     let extend = min(buffer.count, Int(capacity))
