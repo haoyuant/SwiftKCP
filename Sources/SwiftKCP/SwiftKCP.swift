@@ -6,7 +6,7 @@
 //  Copyright © 2018年 rannger. All rights reserved.
 //
 
-import Cocoa
+import Foundation
 
 fileprivate extension Array {
     mutating func removeAtIndexes(indexes: NSIndexSet) {
