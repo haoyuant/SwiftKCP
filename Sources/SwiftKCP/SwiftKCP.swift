@@ -22,27 +22,27 @@ fileprivate extension Array {
 //=====================================================================
 // KCP BASIC
 //=====================================================================
-let IKCP_RTO_NDL : uint32 = 30        // no delay min rto
-let IKCP_RTO_MIN : uint32 = 100        // normal min rto
-let IKCP_RTO_DEF : uint32 = 200
-let IKCP_RTO_MAX : uint32 = 60000
-let IKCP_CMD_PUSH : uint32 = 81        // cmd: push data
-let IKCP_CMD_ACK  : uint32 = 82        // cmd: ack
-let IKCP_CMD_WASK : uint32 = 83        // cmd: window probe (ask)
-let IKCP_CMD_WINS : uint32 = 84        // cmd: window size (tell)
-let IKCP_ASK_SEND : uint32 = 1        // need to send IKCP_CMD_WASK
-let IKCP_ASK_TELL : uint32 = 2        // need to send IKCP_CMD_WINS
-let IKCP_WND_SND : uint32 = 32
-let IKCP_WND_RCV : uint32 = 128       // must >: uint32 = max fragment size
-let IKCP_MTU_DEF : uint32 = 1400
-let IKCP_ACK_FAST : uint32 = 3
-let IKCP_INTERVAL : uint32 = 100
-let IKCP_OVERHEAD : uint32 = 24
-let IKCP_DEADLINK : uint32 = 20
-let IKCP_THRESH_INIT : uint32 = 2
-let IKCP_THRESH_MIN : uint32 = 2
-let IKCP_PROBE_INIT : uint32 = 7000        // 7 secs to probe window size
-let IKCP_PROBE_LIMIT : uint32 = 120000    // up to 120 secs to probe window
+let IKCP_RTO_NDL : UInt32 = 30        // no delay min rto
+let IKCP_RTO_MIN : UInt32 = 100        // normal min rto
+let IKCP_RTO_DEF : UInt32 = 200
+let IKCP_RTO_MAX : UInt32 = 60000
+let IKCP_CMD_PUSH : UInt32 = 81        // cmd: push data
+let IKCP_CMD_ACK  : UInt32 = 82        // cmd: ack
+let IKCP_CMD_WASK : UInt32 = 83        // cmd: window probe (ask)
+let IKCP_CMD_WINS : UInt32 = 84        // cmd: window size (tell)
+let IKCP_ASK_SEND : UInt32 = 1        // need to send IKCP_CMD_WASK
+let IKCP_ASK_TELL : UInt32 = 2        // need to send IKCP_CMD_WINS
+let IKCP_WND_SND : UInt32 = 32
+let IKCP_WND_RCV : UInt32 = 128       // must >: UInt32 = max fragment size
+let IKCP_MTU_DEF : UInt32 = 1400
+let IKCP_ACK_FAST : UInt32 = 3
+let IKCP_INTERVAL : UInt32 = 100
+let IKCP_OVERHEAD : UInt32 = 24
+let IKCP_DEADLINK : UInt32 = 20
+let IKCP_THRESH_INIT : UInt32 = 2
+let IKCP_THRESH_MIN : UInt32 = 2
+let IKCP_PROBE_INIT : UInt32 = 7000        // 7 secs to probe window size
+let IKCP_PROBE_LIMIT : UInt32 = 120000    // up to 120 secs to probe window
 
 let IKCP_LOG_OUTPUT : Int         = 1
 let IKCP_LOG_INPUT : Int          = 2
@@ -58,30 +58,30 @@ let IKCP_LOG_OUT_PROBE : Int      = 1024
 let IKCP_LOG_OUT_WINS : Int       = 2048
 let IKCP_LOG_ALL : Int            = 4095
 
-fileprivate func _ibound_(lower:uint32,middle:uint32,upper:uint32) -> uint32 {
+fileprivate func _ibound_(lower:UInt32,middle:UInt32,upper:UInt32) -> UInt32 {
     return min(max(lower, middle), upper)
 }
 
-fileprivate func timeDiff(later:uint32,earlier:uint32) -> sint32 {
+fileprivate func timeDiff(later:UInt32,earlier:UInt32) -> sint32 {
     return sint32(later) - sint32(earlier)
 }
 
-fileprivate func KCPEncode8u(p:UnsafeMutablePointer<uint8>,
-                             c:uint8) -> UnsafeMutablePointer<uint8> {
+fileprivate func KCPEncode8u(p:UnsafeMutablePointer<UInt8>,
+                             c:UInt8) -> UnsafeMutablePointer<UInt8> {
     p.pointee = c
     return p+1
 }
 
-fileprivate func KCPDecode8u(p:UnsafeMutablePointer<uint8>,
-                             c:UnsafeMutablePointer<uint8>) -> UnsafePointer<uint8> {
+fileprivate func KCPDecode8u(p:UnsafeMutablePointer<UInt8>,
+                             c:UnsafeMutablePointer<UInt8>) -> UnsafePointer<UInt8> {
     c.pointee = p.pointee
     return UnsafePointer(p+1)
 }
 
-fileprivate func KCPEncode16u(p:UnsafeMutablePointer<uint8>,
-                              w:uint16) -> UnsafeMutablePointer<uint8> {
+fileprivate func KCPEncode16u(p:UnsafeMutablePointer<UInt8>,
+                              w:UInt16) -> UnsafeMutablePointer<UInt8> {
     var bigEndian = w.littleEndian
-    let count = MemoryLayout<uint16>.size
+    let count = MemoryLayout<UInt16>.size
     let bytePtr = withUnsafePointer(to: &bigEndian) {
         $0.withMemoryRebound(to: UInt8.self, capacity: count) {
             UnsafeBufferPointer(start: $0, count: count)
@@ -94,21 +94,21 @@ fileprivate func KCPEncode16u(p:UnsafeMutablePointer<uint8>,
     return p+2
 }
 
-fileprivate func KCPDecode16u(p:UnsafeMutablePointer<uint8>,
-                              w:UnsafeMutablePointer<uint16>) -> UnsafePointer<uint8> {
+fileprivate func KCPDecode16u(p:UnsafeMutablePointer<UInt8>,
+                              w:UnsafeMutablePointer<UInt16>) -> UnsafePointer<UInt8> {
     let size = 2
-    var buf = [uint8](repeating: 0, count: size)
+    var buf = [UInt8](repeating: 0, count: size)
     for i in 0..<size {
         buf[i] = (p+i).pointee
     }
     let data = Data(bytes: buf)
     switch CFByteOrderGetCurrent() {
     case CFByteOrder(CFByteOrderLittleEndian.rawValue):
-        let value = uint16(littleEndian: data.withUnsafeBytes { $0.pointee })
+        let value = UInt16(littleEndian: data.withUnsafeBytes { $0.pointee })
         w.pointee = value
         break
     case CFByteOrder(CFByteOrderBigEndian.rawValue):
-        let value = uint16(bigEndian: data.withUnsafeBytes { $0.pointee })
+        let value = UInt16(bigEndian: data.withUnsafeBytes { $0.pointee })
         w.pointee = value
         break
     default:
@@ -118,8 +118,8 @@ fileprivate func KCPDecode16u(p:UnsafeMutablePointer<uint8>,
     return UnsafePointer(p+size)
 }
 
-fileprivate func KCPEncode32u(p:UnsafeMutablePointer<uint8>,
-                              l:uint32) -> UnsafeMutablePointer<uint8> {
+fileprivate func KCPEncode32u(p:UnsafeMutablePointer<UInt8>,
+                              l:UInt32) -> UnsafeMutablePointer<UInt8> {
     
     var bigEndian = l.littleEndian
     let count = MemoryLayout<UInt32>.size
@@ -136,10 +136,10 @@ fileprivate func KCPEncode32u(p:UnsafeMutablePointer<uint8>,
     return p+4
 }
 
-fileprivate func KCPDecode32u(p:UnsafeMutablePointer<uint8>,
-                              l:UnsafeMutablePointer<uint32>) -> UnsafePointer<uint8> {
+fileprivate func KCPDecode32u(p:UnsafeMutablePointer<UInt8>,
+                              l:UnsafeMutablePointer<UInt32>) -> UnsafePointer<UInt8> {
     let size = 4
-    var buf = [uint8](repeating: 0, count: size)
+    var buf = [UInt8](repeating: 0, count: size)
     for i in 0..<size {
         buf[i] = (p+i).pointee
     }
@@ -161,106 +161,106 @@ fileprivate func KCPDecode32u(p:UnsafeMutablePointer<uint8>,
 }
 
 struct IKCPSEG {
-    var conv: uint32 = 0
-    var cmd: uint32 = 0
-    var frg: uint32 = 0
-    var wnd: uint32 = 0
-    var ts: uint32 = 0
-    var sn: uint32 = 0
-    var una: uint32 = 0
-    var resendts: uint32 = 0
-    var rto: uint32 = 0
-    var fastack: uint32 = 0
-    var xmit: uint32 = 0
-    var data: [uint8]
+    var conv: UInt32 = 0
+    var cmd: UInt32 = 0
+    var frg: UInt32 = 0
+    var wnd: UInt32 = 0
+    var ts: UInt32 = 0
+    var sn: UInt32 = 0
+    var una: UInt32 = 0
+    var resendts: UInt32 = 0
+    var rto: UInt32 = 0
+    var fastack: UInt32 = 0
+    var xmit: UInt32 = 0
+    var data: [UInt8]
     
     init(size:Int) {
-        self.data = [uint8](repeating: 0, count: size)
+        self.data = [UInt8](repeating: 0, count: size)
     }
     
     init() {
-        self.data = Array<uint8>()
+        self.data = Array<UInt8>()
     }
     
     func encode() -> Data {
-        let buf = [uint8](repeating: 0, count: 4*5+2+2)
+        let buf = [UInt8](repeating: 0, count: 4*5+2+2)
         var ptr = UnsafeMutablePointer(mutating: buf)
         ptr = KCPEncode32u(p: ptr, l: self.conv)
-        ptr = KCPEncode8u(p: ptr, c: uint8(self.cmd))
-        ptr = KCPEncode8u(p: ptr, c: uint8(self.frg))
-        ptr = KCPEncode16u(p: ptr, w: uint16(self.wnd))
+        ptr = KCPEncode8u(p: ptr, c: UInt8(self.cmd))
+        ptr = KCPEncode8u(p: ptr, c: UInt8(self.frg))
+        ptr = KCPEncode16u(p: ptr, w: UInt16(self.wnd))
         ptr = KCPEncode32u(p: ptr, l: self.ts)
         ptr = KCPEncode32u(p: ptr, l: self.sn)
         ptr = KCPEncode32u(p: ptr, l: self.una)
-        ptr = KCPEncode32u(p: ptr, l: uint32(self.data.count))
+        ptr = KCPEncode32u(p: ptr, l: UInt32(self.data.count))
         return Data(bytes: buf)
     }
 }
 
-fileprivate func DefaultOutput(buf:[uint8],kcp:inout IKCPCB,user:uint64) -> Int {
+fileprivate func DefaultOutput(buf:[UInt8],kcp:inout IKCPCB,user:UInt64) -> Int {
     return 0;
 }
 
-fileprivate func DefaultWritelog(logStr:String,kcp:inout IKCPCB,user:uint64) -> Void {
+fileprivate func DefaultWritelog(logStr:String,kcp:inout IKCPCB,user:UInt64) -> Void {
     print(logStr)
 }
 
 public class IKCPCB {
-    var conv = uint32(0)
-    var mtu = uint32(0)
-    var mss = uint32(0)
-    var state = uint32(0)
+    var conv = UInt32(0)
+    var mtu = UInt32(0)
+    var mss = UInt32(0)
+    var state = UInt32(0)
     
-    var snd_una = uint32(0)
-    var snd_nxt = uint32(0)
-    var rcv_nxt = uint32(0)
+    var snd_una = UInt32(0)
+    var snd_nxt = UInt32(0)
+    var rcv_nxt = UInt32(0)
     
-    var ts_recent = uint32(0)
-    var ts_lastack = uint32(0)
-    var ssthresh = uint32(0)
+    var ts_recent = UInt32(0)
+    var ts_lastack = UInt32(0)
+    var ssthresh = UInt32(0)
     
-    var rx_rttval = uint32(0)
-    var rx_srtt = uint32(0)
-    var rx_rto = uint32(0)
-    var rx_minrto = uint32(0)
+    var rx_rttval = UInt32(0)
+    var rx_srtt = UInt32(0)
+    var rx_rto = UInt32(0)
+    var rx_minrto = UInt32(0)
     
-    var snd_wnd = uint32(0)
-    var rcv_wnd = uint32(0)
-    var rmt_wnd = uint32(0)
-    var cwnd = uint32(0)
-    var probe = uint32(0)
+    var snd_wnd = UInt32(0)
+    var rcv_wnd = UInt32(0)
+    var rmt_wnd = UInt32(0)
+    var cwnd = UInt32(0)
+    var probe = UInt32(0)
     
-    var current = uint32(0)
-    var interval = uint32(0)
-    var ts_flush = uint32(0)
-    var xmit = uint32(0)
+    var current = UInt32(0)
+    var interval = UInt32(0)
+    var ts_flush = UInt32(0)
+    var xmit = UInt32(0)
     
-    var nodelay = uint32(0)
-    var updated = uint32(0)
+    var nodelay = UInt32(0)
+    var updated = UInt32(0)
     
-    var ts_probe = uint32(0)
-    var probe_wait = uint32(0)
+    var ts_probe = UInt32(0)
+    var probe_wait = UInt32(0)
     
-    var dead_link = uint32(0)
+    var dead_link = UInt32(0)
     var snd_queue : [IKCPSEG]
     var rcv_queue : [IKCPSEG]
     var snd_buf : [IKCPSEG]
     var rcv_buf: [IKCPSEG]
-    var incr = uint32(0)
-    var acklist : [uint32]
-    var ackcount = uint32(0)
-    var ackblock = uint32(0)
-    var buffer: [uint8]
-    var user = uint64(0)
+    var incr = UInt32(0)
+    var acklist : [UInt32]
+    var ackcount = UInt32(0)
+    var ackblock = UInt32(0)
+    var buffer: [UInt8]
+    var user = UInt64(0)
     var fastresend = Int(0)
     var nocwnd = Int(0)
     var stream = Int(0)
     var logmask = Int(0)
     
-    var output : (([uint8],inout IKCPCB,uint64) -> Int)?
-    var writelog: ((String,inout IKCPCB,uint64) -> Void)?
+    var output : (([UInt8],inout IKCPCB,UInt64) -> Int)?
+    var writelog: ((String,inout IKCPCB,UInt64) -> Void)?
     
-    init(conv:uint32,user:uint64) {
+    init(conv:UInt32,user:UInt64) {
         
         self.conv = conv
         self.user = user
@@ -280,8 +280,8 @@ public class IKCPCB {
         self.snd_buf = [IKCPSEG]()
         self.rcv_buf = [IKCPSEG]()
         
-        self.buffer = [uint8](repeating: 0, count: Int((self.mtu + IKCP_OVERHEAD)*3))
-        self.acklist = [uint32]()
+        self.buffer = [UInt8](repeating: 0, count: Int((self.mtu + IKCP_OVERHEAD)*3))
+        self.acklist = [UInt32]()
         self.output = DefaultOutput
         self.writelog = DefaultWritelog
     }
@@ -310,14 +310,14 @@ public class IKCPCB {
         }
         var len = Int(0)
         let ispeek = (dataSize < 0)
-        let localBuffer = [uint8](repeating: 0, count: dataSize)
+        let localBuffer = [UInt8](repeating: 0, count: dataSize)
         var buf = UnsafeMutablePointer(mutating: localBuffer)
         
         let indexSet = NSMutableIndexSet()
         for i in 0..<self.rcv_queue.count {
             var seg = self.rcv_queue[Int(i)]
             
-            var fragment = uint32(0)
+            var fragment = UInt32(0)
             for i in 0..<seg.data.count {
                 buf.pointee = seg.data[Int(i)]
                 buf += 1
@@ -356,7 +356,7 @@ public class IKCPCB {
         if self.rcv_queue.count < self.rcv_wnd && recover {
             self.probe |= IKCP_ASK_TELL
         }
-        var temp = [uint8](repeating: 0, count: len)
+        var temp = [UInt8](repeating: 0, count: len)
         for i in 0..<len {
             temp[i] = localBuffer[i]
         }
@@ -384,12 +384,12 @@ public class IKCPCB {
         return 0
     }
     func send(buffer:Data) -> Int {
-        let buf = [uint8](repeating: 0, count: buffer.count)
-        _ = buffer.copyBytes(to: UnsafeMutableBufferPointer<uint8>(start: UnsafeMutablePointer(mutating: buf),
+        let buf = [UInt8](repeating: 0, count: buffer.count)
+        _ = buffer.copyBytes(to: UnsafeMutableBufferPointer<UInt8>(start: UnsafeMutablePointer(mutating: buf),
                                                                    count: buf.count))
         return self._send(_buffer: buf)
     }
-    private func _send(_buffer:[uint8]) -> Int {
+    private func _send(_buffer:[UInt8]) -> Int {
         var buffer = _buffer
         if buffer.count==0 {
             return -1
@@ -398,7 +398,7 @@ public class IKCPCB {
             if !self.snd_queue.isEmpty {
                 var old = self.snd_queue.last!
                 if old.data.count < self.mss {
-                    let capacity = self.mss - uint32(old.data.count)
+                    let capacity = self.mss - UInt32(old.data.count)
                     let extend = min(buffer.count, Int(capacity))
                     var seg = IKCPSEG(size: Int(old.data.count + extend))
                     self.snd_queue.append(seg)
@@ -447,7 +447,7 @@ public class IKCPCB {
                 }
             }
             
-            seg.frg = (self.stream == 0) ? uint32(count - i - 1) : 0
+            seg.frg = (self.stream == 0) ? UInt32(count - i - 1) : 0
             self.snd_queue.append(seg)
             buffer = Array(UnsafeBufferPointer(start: UnsafeMutablePointer(mutating:buffer) + min(buffer.count,size),
                                                count: max(0, buffer.count - size)))
@@ -457,17 +457,17 @@ public class IKCPCB {
     }
     
     private func updateAck(rtt:Int32) {
-        var rto = uint32(0)
+        var rto = UInt32(0)
         if 0 == self.rx_srtt {
-            self.rx_srtt = uint32(rtt)
-            self.rx_rttval = uint32(rtt / 2)
+            self.rx_srtt = UInt32(rtt)
+            self.rx_rttval = UInt32(rtt / 2)
         } else {
             var delta = rtt - Int32(self.rx_srtt)
             if delta < 0 {
                 delta = -delta
             }
-            self.rx_rttval = (3*self.rx_rttval+uint32(delta)) / 4
-            self.rx_srtt = (7*self.rx_srtt+uint32(rtt)) / 8
+            self.rx_rttval = (3*self.rx_rttval+UInt32(delta)) / 4
+            self.rx_srtt = (7*self.rx_srtt+UInt32(rtt)) / 8
             self.rx_srtt = max(1, self.rx_srtt)
         }
         
@@ -484,7 +484,7 @@ public class IKCPCB {
         }
     }
     
-    private func parseAck(sn:uint32) {
+    private func parseAck(sn:UInt32) {
         if timeDiff(later: sn, earlier: self.snd_una) < 0 ||
             timeDiff(later: sn, earlier: self.snd_nxt) >= 0 {
             return
@@ -504,7 +504,7 @@ public class IKCPCB {
         self.snd_buf.removeAtIndexes(indexes: indexSet)
     }
     
-    private func parseUna(una:uint32) {
+    private func parseUna(una:UInt32) {
         let indexSet = NSMutableIndexSet()
         for i in 0..<self.snd_buf.count {
             let seg = self.snd_buf[i]
@@ -517,7 +517,7 @@ public class IKCPCB {
         self.snd_buf.removeAtIndexes(indexes: indexSet)
     }
     
-    private func parseFastack(sn:uint32) {
+    private func parseFastack(sn:UInt32) {
         if timeDiff(later: sn, earlier: self.snd_una) < 0 ||
             timeDiff(later: sn, earlier: self.snd_nxt) >= 0 {
             return
@@ -533,14 +533,14 @@ public class IKCPCB {
         return
     }
     
-    private func ackPush(sn:uint32,ts:uint32) {
+    private func ackPush(sn:UInt32,ts:UInt32) {
         let newsize = self.ackcount + 1
         if newsize > self.ackblock {
-            var newblock = uint32(8)
+            var newblock = UInt32(8)
             while newblock < newsize {
                 newblock <<= 1
             }
-            var acklist = Array<uint32>(repeating: 0, count: Int(newblock*2))
+            var acklist = Array<UInt32>(repeating: 0, count: Int(newblock*2))
             if self.acklist.count != 0 {
                 for x in 0..<Int(self.ackcount) {
                     acklist[x*2] = self.acklist[x*2]
@@ -565,7 +565,7 @@ public class IKCPCB {
         return 0;
     }
     
-    private func ackGet(p:Int,sn:UnsafeMutablePointer<uint32>?,ts:UnsafeMutablePointer<uint32>?) {
+    private func ackGet(p:Int,sn:UnsafeMutablePointer<UInt32>?,ts:UnsafeMutablePointer<UInt32>?) {
         sn?.pointee = self.acklist[p*2+0]
         ts?.pointee = self.acklist[p*2+1]
     }
@@ -604,15 +604,15 @@ public class IKCPCB {
     }
     
     func input(data:Data) -> Int {
-        let buf = [uint8](repeating: 0, count: data.count)
-        _ = data.copyBytes(to: UnsafeMutableBufferPointer<uint8>(start: UnsafeMutablePointer(mutating: buf),
+        let buf = [UInt8](repeating: 0, count: data.count)
+        _ = data.copyBytes(to: UnsafeMutableBufferPointer<UInt8>(start: UnsafeMutablePointer(mutating: buf),
                                                                  count: buf.count))
         return self._input(dt: buf)
     }
-    private func _input(dt:[uint8]) -> Int {
+    private func _input(dt:[UInt8]) -> Int {
         var data = dt
         let una = self.snd_una
-        var maxack = uint32(0)
+        var maxack = UInt32(0)
         var flag = false
         if self.canlog(mask: IKCP_LOG_OUTPUT) {
             self.log(mask: IKCP_LOG_OUTPUT, fmt: "[RI] %d bytes", data.count)
@@ -623,9 +623,9 @@ public class IKCPCB {
         }
         
         while (true) {
-            var ts = uint32(0),sn = uint32(0), len = uint32(0),una = uint32(0),conv = uint32(0)
-            var wnd = uint16(0)
-            var cmd = uint8(0),frg = uint8(0)
+            var ts = UInt32(0),sn = UInt32(0), len = UInt32(0),una = UInt32(0),conv = UInt32(0)
+            var wnd = UInt16(0)
+            var cmd = UInt8(0),frg = UInt8(0)
             if data.count < Int(IKCP_OVERHEAD) {
                 break
             }
@@ -668,7 +668,7 @@ public class IKCPCB {
                 return -3
             }
             
-            self.rmt_wnd = uint32(wnd);
+            self.rmt_wnd = UInt32(wnd);
             self.parseUna(una: una)
             self.shrinkBuf()
             if IKCP_CMD_ACK == cmd {
@@ -701,9 +701,9 @@ public class IKCPCB {
                     if timeDiff(later: sn, earlier: self.rcv_nxt) >= 0 {
                         var seg = IKCPSEG(size: Int(len))
                         seg.conv = conv
-                        seg.cmd = uint32(cmd)
-                        seg.frg = uint32(frg)
-                        seg.wnd = uint32(wnd)
+                        seg.cmd = UInt32(cmd)
+                        seg.frg = UInt32(frg)
+                        seg.wnd = UInt32(wnd)
                         seg.ts = ts
                         seg.sn = sn
                         seg.una = una
@@ -723,7 +723,7 @@ public class IKCPCB {
                 }
             } else if IKCP_CMD_WINS == cmd {
                 if self.canlog(mask: IKCP_LOG_IN_WINS) {
-                    self.log(mask: IKCP_LOG_IN_WINS, fmt: "input wins: %lu",uint32(wnd))
+                    self.log(mask: IKCP_LOG_IN_WINS, fmt: "input wins: %lu",UInt32(wnd))
                 }
             } else {
                 return -3
@@ -774,13 +774,13 @@ public class IKCPCB {
         seg.conv = self.conv
         seg.cmd = IKCP_CMD_ACK
         seg.frg = 0
-        seg.wnd = uint32(self.wndUnused())
+        seg.wnd = UInt32(self.wndUnused())
         seg.una = self.rcv_nxt
         seg.sn = 0
         seg.ts = 0
         
         for i in 0..<Int(self.ackcount) {
-            let size = uint32(ptr - buffer)
+            let size = UInt32(ptr - buffer)
             if size + IKCP_OVERHEAD > self.mtu {
                 let data = Array(UnsafeBufferPointer(start: buffer,
                                                      count: Int(size)))
@@ -790,8 +790,8 @@ public class IKCPCB {
             
             self.ackGet(p: i, sn: &seg.sn, ts: &seg.ts)
             let data : Data = seg.encode()
-            let buf = [uint8](repeating: 0, count: data.count)
-            _ = data.copyBytes(to: UnsafeMutableBufferPointer<uint8>(start: UnsafeMutablePointer(mutating: buf), count: buf.count))
+            let buf = [UInt8](repeating: 0, count: data.count)
+            _ = data.copyBytes(to: UnsafeMutableBufferPointer<UInt8>(start: UnsafeMutablePointer(mutating: buf), count: buf.count))
             for b in buf {
                 ptr.pointee = b
                 ptr += 1
@@ -824,7 +824,7 @@ public class IKCPCB {
         
         if 0 != (self.probe & IKCP_ASK_SEND) {
             seg.cmd = IKCP_CMD_WASK
-            let size = uint32(ptr - buffer)
+            let size = UInt32(ptr - buffer)
             if size + IKCP_OVERHEAD > self.mtu {
                 let data = Array(UnsafeBufferPointer(start: buffer,
                                                      count: Int(size)))
@@ -833,8 +833,8 @@ public class IKCPCB {
             }
             
             let data : Data = seg.encode()
-            let buf = [uint8](repeating: 0, count: data.count)
-            _ = data.copyBytes(to: UnsafeMutableBufferPointer<uint8>(start: UnsafeMutablePointer(mutating: buf), count: buf.count))
+            let buf = [UInt8](repeating: 0, count: data.count)
+            _ = data.copyBytes(to: UnsafeMutableBufferPointer<UInt8>(start: UnsafeMutablePointer(mutating: buf), count: buf.count))
             for b in buf {
                 ptr.pointee = b
                 ptr += 1
@@ -843,7 +843,7 @@ public class IKCPCB {
         
         if 0 != (self.probe & IKCP_ASK_TELL) {
             seg.cmd = IKCP_CMD_WINS
-            let size = uint32(ptr - buffer)
+            let size = UInt32(ptr - buffer)
             if size + IKCP_OVERHEAD > self.mtu {
                 let data = Array(UnsafeBufferPointer(start: buffer,
                                                      count: Int(size)))
@@ -851,8 +851,8 @@ public class IKCPCB {
                 ptr = buffer
             }
             let data : Data = seg.encode()
-            let buf = [uint8](repeating: 0, count: data.count)
-            _ = data.copyBytes(to: UnsafeMutableBufferPointer<uint8>(start: UnsafeMutablePointer(mutating: buf),
+            let buf = [UInt8](repeating: 0, count: data.count)
+            _ = data.copyBytes(to: UnsafeMutableBufferPointer<UInt8>(start: UnsafeMutablePointer(mutating: buf),
                                                                      count: buf.count))
             for b in buf {
                 ptr.pointee = b
@@ -935,8 +935,8 @@ public class IKCPCB {
                 }
                 
                 let data : Data = segment.encode()
-                let buf = [uint8](repeating: 0, count: data.count)
-                _ = data.copyBytes(to: UnsafeMutableBufferPointer<uint8>(start: UnsafeMutablePointer(mutating: buf),
+                let buf = [UInt8](repeating: 0, count: data.count)
+                _ = data.copyBytes(to: UnsafeMutableBufferPointer<UInt8>(start: UnsafeMutablePointer(mutating: buf),
                                                                          count: buf.count))
                 for b in buf {
                     ptr.pointee = b
@@ -951,7 +951,7 @@ public class IKCPCB {
                 }
                 
                 if segment.xmit >= self.dead_link {
-                    self.state = uint32(Int.max)
+                    self.state = UInt32(Int.max)
                 }
             }
         }
@@ -968,7 +968,7 @@ public class IKCPCB {
             if self.ssthresh < IKCP_THRESH_MIN {
                 self.ssthresh = IKCP_THRESH_MIN
             }
-            self.cwnd = self.ssthresh + uint32(resent)
+            self.cwnd = self.ssthresh + UInt32(resent)
             self.incr = self.cwnd * self.mss
         }
         
@@ -987,7 +987,7 @@ public class IKCPCB {
         }
     }
     
-    func update(current:uint32) {
+    func update(current:UInt32) {
         var slap = Int32(0)
         self.current = current
         if 0 == self.updated {
@@ -1009,11 +1009,11 @@ public class IKCPCB {
         }
     }
     
-    func check(current:uint32) -> uint32 {
+    func check(current:UInt32) -> UInt32 {
         var ts_flush = self.ts_flush
         var tm_flush = Int32(0x7fffffff)
         var tm_packet = Int32(0x7fffffff)
-        var minimal = uint32(0)
+        var minimal = UInt32(0)
         
         if 0 == self.updated {
             return current
@@ -1040,25 +1040,25 @@ public class IKCPCB {
             }
         }
         
-        minimal = uint32(tm_packet < tm_flush ? tm_packet : tm_flush)
+        minimal = UInt32(tm_packet < tm_flush ? tm_packet : tm_flush)
         if minimal > self.interval {
             minimal = self.interval
         }
         return current + minimal
     }
     
-    func setmtu(mtu:uint32) -> Int {
+    func setmtu(mtu:UInt32) -> Int {
         if self.mtu < 50 || mtu < IKCP_OVERHEAD {
             return -1
         }
-        let buffer = [uint8](repeating: 0, count: Int((mtu + IKCP_OVERHEAD)*3))
+        let buffer = [UInt8](repeating: 0, count: Int((mtu + IKCP_OVERHEAD)*3))
         self.mtu = mtu
         self.mss = self.mtu - IKCP_OVERHEAD
         self.buffer = buffer
         return 0
     }
     
-    func `internal`(internalVal:uint32) -> Int {
+    func `internal`(internalVal:UInt32) -> Int {
         var val = internalVal
         if val > 5000 {
             val = 5000
@@ -1069,7 +1069,7 @@ public class IKCPCB {
         return 0;
     }
     
-    func nodelay(nodelay:uint32,internalVal:uint32,resend:uint32,nc:uint32) -> Int {
+    func nodelay(nodelay:UInt32,internalVal:UInt32,resend:UInt32,nc:UInt32) -> Int {
         if nodelay >= 0 {
             self.nodelay = nodelay
             if 0 != nodelay {
@@ -1098,7 +1098,7 @@ public class IKCPCB {
         return 0
     }
     
-    func wndSize(sndwnd:uint32,rcvwnd:uint32) -> Int {
+    func wndSize(sndwnd:UInt32,rcvwnd:UInt32) -> Int {
         if sndwnd > 0 {
             self.snd_wnd = sndwnd
         }
@@ -1130,7 +1130,7 @@ public class IKCPCB {
         self.writelog?(log,&weakSelf,self.user)
     }
     
-    private func _output(data:[uint8]) -> Int {
+    private func _output(data:[UInt8]) -> Int {
         if nil == self.output {
             return 0
         }
@@ -1150,7 +1150,7 @@ public class IKCPCB {
     }
 }
 
-func getConv(ptr:UnsafeMutablePointer<uint8>) -> UInt32 {
+func getConv(ptr:UnsafeMutablePointer<UInt8>) -> UInt32 {
     var conv = UInt32(0)
     _ = KCPDecode32u(p: ptr, l: &conv)
     return conv
